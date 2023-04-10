@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import it.ifin.demo.sbkm.base.Const;
 import it.ifin.demo.sbkm.base.domain.Order;
 import it.ifin.demo.sbkm.stock.domain.Product;
 import it.ifin.demo.sbkm.stock.repository.ProductRepository;
@@ -12,7 +13,6 @@ import it.ifin.demo.sbkm.stock.repository.ProductRepository;
 @Service
 public class OrderService {
     
-    private static final String SOURCE = "stock";
     private static final Logger LOG = LoggerFactory.getLogger(OrderService.class);
     private ProductRepository repository;
     private KafkaTemplate<Long, Order> template;
@@ -25,16 +25,16 @@ public class OrderService {
     public void reserve(Order order) {
         Product product = repository.findById(order.getProductId()).orElseThrow();
         LOG.info("Found: {}", product);
-        if (order.getStatus().equals("NEW")) {
+        if (order.getStatus().equals(Const.Status.NEW)) {
             if (order.getProductCount() < product.getAvailableItems()) {
                 product.setReservedItems(product.getReservedItems() + order.getProductCount());
                 product.setAvailableItems(product.getAvailableItems() - order.getProductCount());
-                order.setStatus("ACCEPT");
+                order.setStatus(Const.Status.ACCEPT);
                 repository.save(product);
             } else {
-                order.setStatus("REJECT");
+                order.setStatus(Const.Status.REJECT);
             }
-            template.send("stock-orders", order.getId(), order);
+            template.send(Const.Topic.STOCK_ORDERS, order.getId(), order);
             LOG.info("Sent: {}", order);
         }
     }
@@ -42,10 +42,10 @@ public class OrderService {
     public void confirm(Order order) {
         Product product = repository.findById(order.getProductId()).orElseThrow();
         LOG.info("Found: {}", product);
-        if (order.getStatus().equals("CONFIRMED")) {
+        if (order.getStatus().equals(Const.Status.CONFIRMED)) {
             product.setReservedItems(product.getReservedItems() - order.getProductCount());
             repository.save(product);
-        } else if (order.getStatus().equals("ROLLBACK") && !order.getSource().equals(SOURCE)) {
+        } else if (order.getStatus().equals(Const.Status.ROLLBACK) && !order.getSource().equals(Const.Source.STOCK)) {
             product.setReservedItems(product.getReservedItems() - order.getProductCount());
             product.setAvailableItems(product.getAvailableItems() + order.getProductCount());
             repository.save(product);

@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.KafkaListener;
 
+import it.ifin.demo.sbkm.base.Const;
 import it.ifin.demo.sbkm.base.domain.Order;
 import it.ifin.demo.sbkm.stock.domain.Product;
 import it.ifin.demo.sbkm.stock.repository.ProductRepository;
@@ -32,7 +33,7 @@ public class StockApp {
     @KafkaListener(id = "orders", topics = "orders", groupId = "stock")
     public void onEvent(Order o) {
         LOG.info("Received: {}" , o);
-        if (o.getStatus().equals("NEW"))
+        if (o.getStatus().equals(Const.Status.NEW))
             orderService.reserve(o);
         else
             orderService.confirm(o);

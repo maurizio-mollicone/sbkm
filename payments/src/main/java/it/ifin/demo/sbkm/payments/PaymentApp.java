@@ -1,6 +1,5 @@
 package it.ifin.demo.sbkm.payments;
 
-import java.security.SecureRandom;
 import java.util.Random;
 
 import org.slf4j.Logger;

@@ -23,8 +23,8 @@ public class OrderManageService {
         } else if (orderPayment.getStatus().equals(Const.Status.REJECT) ||
                 orderStock.getStatus().equals(Const.Status.REJECT)) {
             String source = orderPayment.getStatus().equals(Const.Status.REJECT)
-                    ? Const.Service.PAYMENT
-                    : Const.Service.STOCK;
+                    ? Const.Source.PAYMENT.toUpperCase()
+                    : Const.Source.STOCK.toUpperCase();
             o.setStatus(Const.Status.ROLLBACK);
             o.setSource(source);
         }

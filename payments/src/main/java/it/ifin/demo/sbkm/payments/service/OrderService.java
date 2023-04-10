@@ -33,7 +33,7 @@ public class OrderService {
         } else {
             order.setStatus(Const.Status.REJECT);
         }
-        order.setSource(Const.Topic.PAYMENT);
+        order.setSource(Const.Source.PAYMENT);
         repository.save(customer);
         template.send(Const.Topic.PAYMENT_ORDERS, order.getId(), order);
         LOG.info("Sent: {}", order);
